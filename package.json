@@ -1,0 +1,11 @@
+{
+  "name": "rh18932-site",
+  "private": true,
+  "description": "Static orbital tracker for asteroid 18932 Robinhood",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}

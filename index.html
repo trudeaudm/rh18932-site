@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$RH-18932 — Robinhood Chain Deep Space Desk</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<meta property="og:title" content="$RH-18932 — Robinhood Chain Deep Space Desk">
+<meta property="og:description" content="Live orbital tracker for asteroid 18932 Robinhood. Distance to Earth, quoted like a ticker.">
+<meta property="og:image" content="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000000;
+  --panel:#0a0f0a;
+  --panel2:#0e150e;
+  --line:#1b241b;
+  --green:#00c805;
+  --green-dim:#0a5c0e;
+  --orange:#ff5000;
+  --ink:#e6f2e6;
+  --mut:#6f8270;
+  --font:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font);
+  overflow:hidden;
+}
+#app{display:flex;height:100vh}
+
+/* ---------- left: orbit map ---------- */
+#mapwrap{flex:1;position:relative;min-width:0}
+#orbitmap{display:block;width:100%;height:100%;cursor:grab}
+#orbitmap:active{cursor:grabbing}
+#maphead{
+  position:absolute;top:0;left:0;right:0;
+  padding:18px 22px;
+  display:flex;align-items:baseline;gap:14px;
+  pointer-events:none;
+}
+#maphead h1{
+  font-size:15px;font-weight:700;letter-spacing:.04em;color:var(--green);
+}
+#maphead .sub{font-size:12px;color:var(--mut)}
+#simdate{
+  position:absolute;left:22px;bottom:66px;
+  font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;
+  pointer-events:none;
+}
+#simdate small{display:block;font-size:11px;font-weight:400;color:var(--mut);letter-spacing:.03em}
+
+#timebar{
+  position:absolute;left:0;right:0;bottom:0;
+  display:flex;align-items:center;gap:10px;
+  padding:12px 22px;
+  background:linear-gradient(transparent,rgba(0,0,0,.85) 40%);
+}
+#timebar button{
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-family:var(--font);font-size:13px;font-weight:500;
+  padding:8px 14px;border-radius:999px;cursor:pointer;
+}
+#timebar button:hover{border-color:var(--green-dim)}
+#timebar button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+#timebar button.primary{background:var(--green);color:#001c01;border-color:var(--green);font-weight:700;min-width:78px}
+#scrub{flex:1;accent-color:var(--green);cursor:pointer;min-width:60px}
+#speedlabel{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:92px;text-align:right}
+
+/* ---------- right: terminal panel ---------- */
+#panel{
+  width:380px;flex-shrink:0;
+  background:var(--panel);
+  border-left:1px solid var(--line);
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+#pair{padding:20px 20px 6px;display:flex;align-items:center;gap:14px}
+#pair .logo{
+  width:68px;height:68px;border-radius:50%;flex-shrink:0;
+  border:1px solid var(--line);
+  box-shadow:0 0 18px rgba(0,200,5,.12);
+}
+#pair .chip{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  color:#001c01;background:var(--green);border-radius:4px;padding:3px 8px;
+}
+#pair h2{font-size:19px;font-weight:700;margin-top:10px}
+#pair .fullname{font-size:12px;color:var(--mut);margin-top:2px}
+
+#quote{padding:8px 20px 16px;border-bottom:1px solid var(--line)}
+#bigdist{font-size:42px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.05}
+#bigdist span{font-size:18px;color:var(--mut);font-weight:500}
+#kmline{font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums;margin-top:2px}
+#delta{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:10px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;
+  padding:4px 10px;border-radius:6px;
+}
+#delta.closing{color:var(--green);background:rgba(0,200,5,.1)}
+#delta.receding{color:var(--orange);background:rgba(255,80,0,.1)}
+#delta .arrow{font-size:15px;line-height:1}
+
+#chartbox{padding:14px 20px 4px;border-bottom:1px solid var(--line)}
+#chartbox .charthead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+#chartbox .charthead .t{font-size:12px;color:var(--mut)}
+#chartbox .charthead .range{font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums}
+#distchart{display:block;width:100%;height:130px}
+#band{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;
+  padding:8px 0 12px;
+}
+
+#approach{padding:14px 20px;border-bottom:1px solid var(--line)}
+#approach .t{font-size:12px;color:var(--mut);margin-bottom:4px}
+#approach .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+#approach .v em{font-style:normal;color:var(--green)}
+
+#stats{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:1px solid var(--line);
+}
+#stats>div{padding:12px 20px;border-top:1px solid var(--line)}
+#stats>div:nth-child(-n+2){border-top:none}
+#stats>div:nth-child(odd){border-right:1px solid var(--line)}
+#stats .k{font-size:11px;color:var(--mut)}
+#stats .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+
+details#elements{border-bottom:1px solid var(--line)}
+details#elements summary{
+  padding:14px 20px;font-size:13px;font-weight:500;cursor:pointer;
+  color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;
+}
+details#elements summary::after{content:"+";color:var(--mut);font-size:16px}
+details#elements[open] summary::after{content:"–"}
+details#elements summary:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+#elements .body{padding:0 20px 16px}
+#elements .note{font-size:12px;color:var(--mut);line-height:1.5;margin-bottom:12px}
+#elements .note a{color:var(--green);text-decoration:none;border-bottom:1px solid var(--green-dim)}
+#elements .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+#elements label{font-size:11px;color:var(--mut);display:block}
+#elements label b{color:var(--ink);font-weight:500}
+#elements input{
+  width:100%;margin-top:4px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+  color:var(--ink);font-family:var(--font);font-size:13px;font-variant-numeric:tabular-nums;
+  padding:7px 9px;
+}
+#elements input:focus{outline:none;border-color:var(--green)}
+#elements input.confirmed{border-color:var(--green-dim)}
+#elements .tag{font-size:10px;color:var(--green)}
+#elements .tag.ph{color:var(--orange)}
+
+#foot{padding:14px 20px;font-size:11px;color:var(--mut);line-height:1.6;margin-top:auto}
+#foot a{color:var(--green);text-decoration:none;border-bottom:1px solid var(--green-dim)}
+
+@media (max-width:860px){
+  body{overflow:auto}
+  #app{flex-direction:column;height:auto}
+  #mapwrap{height:58vh;flex:none}
+  #panel{width:100%;border-left:none;border-top:1px solid var(--line)}
+  #bigdist{font-size:34px}
+}
+@media (prefers-reduced-motion:reduce){
+  /* sim starts paused; handled in JS via this query */
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="mapwrap">
+    <canvas id="orbitmap"></canvas>
+    <div id="maphead">
+      <h1>ROBINHOOD CHAIN · DEEP SPACE DESK</h1>
+      <div class="sub">heliocentric view · ecliptic plane · drag to pan · scroll to zoom</div>
+    </div>
+    <div id="simdate"><small>SIMULATION DATE</small><span id="datestr">—</span></div>
+    <div id="timebar">
+      <button id="playbtn" class="primary" aria-label="Play or pause simulation">Pause</button>
+      <button id="todaybtn">Today</button>
+      <button id="slower" aria-label="Slower">−</button>
+      <input type="range" id="scrub" min="0" max="100" value="50" aria-label="Simulation speed">
+      <button id="faster" aria-label="Faster">+</button>
+      <div id="speedlabel">30 d/s</div>
+    </div>
+  </div>
+
+  <div id="panel">
+    <div id="pair">
+      <img class="logo" src="assets/logo.png" alt="18932 Robinhood badge — an asteroid wearing a Robin Hood hat">
+      <div>
+        <span class="chip">$RH-18932</span>
+        <h2>RH-18932 / EARTH</h2>
+        <div class="fullname">18932 Robinhood (2000 QH35) · main-belt asteroid · proximity pair</div>
+      </div>
+    </div>
+
+    <div id="quote">
+      <div id="bigdist">— <span>AU</span></div>
+      <div id="kmline">—</div>
+      <div id="delta" class="closing"><span class="arrow">▼</span><span id="deltatxt">—</span></div>
+    </div>
+
+    <div id="chartbox">
+      <div class="charthead">
+        <div class="t">Distance to Earth</div>
+        <div class="range" id="chartrange">—</div>
+      </div>
+      <canvas id="distchart" height="130"></canvas>
+      <div id="band"><span id="bandlo">low —</span><span id="bandhi">high —</span></div>
+    </div>
+
+    <div id="approach">
+      <div class="t">Next close approach (4-yr scan)</div>
+      <div class="v" id="approachv">—</div>
+    </div>
+
+    <div id="stats">
+      <div><div class="k">Perihelion</div><div class="v" id="s-peri">—</div></div>
+      <div><div class="k">Aphelion</div><div class="v" id="s-aph">—</div></div>
+      <div><div class="k">Orbital period</div><div class="v" id="s-per">—</div></div>
+      <div><div class="k">Heliocentric dist.</div><div class="v" id="s-helio">—</div></div>
+      <div><div class="k">Orbital speed</div><div class="v" id="s-vel">—</div></div>
+      <div><div class="k">Eccentricity</div><div class="v" id="s-ecc">—</div></div>
+    </div>
+
+    <details id="elements">
+      <summary>Orbital elements</summary>
+      <div class="body">
+        <div class="note" id="el-note">
+          All six elements are from the JPL Small-Body Database, orbit solution 60,
+          epoch JD 2461200.5 (equinox J2000). Look it up yourself:
+          <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL SBDB</a>
+          ·
+          <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
+          Edit any value and everything recalculates live.
+        </div>
+        <div class="grid">
+          <label><b>a</b> semi-major axis, AU <span class="tag">JPL</span>
+            <input id="el-a" class="confirmed" type="number" step="0.0001" value="2.35"></label>
+          <label><b>e</b> eccentricity <span class="tag">JPL</span>
+            <input id="el-e" class="confirmed" type="number" step="0.000001" value="0.237"></label>
+          <label><b>i</b> inclination, ° <span class="tag">JPL</span>
+            <input id="el-i" class="confirmed" type="number" step="0.001" value="2.58"></label>
+          <label><b>Ω</b> asc. node, ° <span class="tag">JPL</span>
+            <input id="el-om" class="confirmed" type="number" step="0.001" value="37.2"></label>
+          <label><b>ω</b> arg. perihelion, ° <span class="tag">JPL</span>
+            <input id="el-w" class="confirmed" type="number" step="0.001" value="275.0"></label>
+          <label><b>M₀</b> mean anomaly @ epoch, ° <span class="tag">JPL</span>
+            <input id="el-m" class="confirmed" type="number" step="0.001" value="75.3"></label>
+        </div>
+      </div>
+    </details>
+
+    <div id="foot">
+      Look up 18932 Robinhood at the
+      <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL Small-Body Database</a>
+      or the
+      <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
+      Two-body Keplerian propagation. Inner planets use J2000 mean elements; positions are
+      illustrative, not ephemeris-grade. Green means the rock is closing on Earth. Not financial advice,
+      not planetary-defense advice.
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ================= math ================= */
+const DEG = Math.PI/180;
+const AU_KM = 149597870.7;
+const J2000 = 2451545.0;
+
+function kepler(M, e){
+  M = M % (2*Math.PI);
+  let E = e < 0.8 ? M : Math.PI;
+  for(let k=0;k<12;k++){
+    const d = (E - e*Math.sin(E) - M) / (1 - e*Math.cos(E));
+    E -= d;
+    if(Math.abs(d) < 1e-9) break;
+  }
+  return E;
+}
+
+/* heliocentric ecliptic xyz (AU) from elements at julian date */
+function position(el, jd){
+  const n = 2*Math.PI / el.period;               // rad/day
+  const M = (el.M0*DEG + n*(jd - el.epoch));
+  const E = kepler(((M % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI), el.e);
+  const xv = el.a * (Math.cos(E) - el.e);
+  const yv = el.a * Math.sqrt(1 - el.e*el.e) * Math.sin(E);
+  const r  = Math.sqrt(xv*xv + yv*yv);
+  const v  = Math.atan2(yv, xv);                 // true anomaly
+  const w = el.w*DEG, om = el.om*DEG, i = el.i*DEG;
+  const cosom=Math.cos(om), sinom=Math.sin(om);
+  const cosi=Math.cos(i),  sini=Math.sin(i);
+  const arg = v + w;
+  const cosa=Math.cos(arg), sina=Math.sin(arg);
+  return {
+    x: r*(cosom*cosa - sinom*sina*cosi),
+    y: r*(sinom*cosa + cosom*sina*cosi),
+    z: r*(sina*sini),
+    r, v, E
+  };
+}
+
+function orbitalSpeed(a, r){ // vis-viva, km/s (mu_sun)
+  const MU = 1.32712440018e11; // km^3/s^2
+  return Math.sqrt(MU * (2/(r*AU_KM) - 1/(a*AU_KM)));
+}
+
+function jdFromDate(d){ return d.getTime()/86400000 + 2440587.5; }
+function dateFromJD(jd){ return new Date((jd - 2440587.5)*86400000); }
+function fmtDate(jd){
+  const d = dateFromJD(jd);
+  return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+}
+
+/* ================= bodies ================= */
+/* J2000 mean elements, epoch JD 2451545.0 */
+const PLANETS = [
+ {name:'Mercury', a:0.38710, e:0.20563, i:7.005,  om:48.331,  w:29.124,  M0:174.796, period:87.969,  epoch:J2000, col:'#5a6b5a', rad:2.5},
+ {name:'Venus',   a:0.72333, e:0.00677, i:3.395,  om:76.680,  w:54.884,  M0:50.416,  period:224.701, epoch:J2000, col:'#8fa38f', rad:3.5},
+ {name:'Earth',   a:1.00000, e:0.01671, i:0.0,    om:0.0,     w:102.947, M0:357.517, period:365.256, epoch:J2000, col:'#4aa3ff', rad:4},
+ {name:'Mars',    a:1.52368, e:0.09340, i:1.850,  om:49.558,  w:286.502, M0:19.373,  period:686.980, epoch:J2000, col:'#c96a4a', rad:3},
+];
+const EARTH = PLANETS[2];
+
+let astEpoch = 2461200.5; // JPL SBDB orbit solution 60 epoch (2026-Jun-09); fetch may bump this
+let ast = null;
+let elementsTouched = false;
+function readElements(){
+  const a  = parseFloat(document.getElementById('el-a').value)  || 2.35;
+  const e  = Math.min(0.95, Math.max(0, parseFloat(document.getElementById('el-e').value) || 0.237));
+  const i  = parseFloat(document.getElementById('el-i').value)  || 0;
+  const om = parseFloat(document.getElementById('el-om').value) || 0;
+  const w  = parseFloat(document.getElementById('el-w').value)  || 0;
+  const M0 = parseFloat(document.getElementById('el-m').value)  || 0;
+  ast = {name:'18932 Robinhood', a,e,i,om,w,M0, period:365.256898*Math.pow(a,1.5), epoch:astEpoch};
+  rebuildStatics();
+}
+
+const JPL_HOST = 'https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=18932&full-prec=true';
+const JPL_SBDB = (location.hostname==='localhost' || location.hostname==='127.0.0.1')
+  ? '/sbdb.api?sstr=18932&full-prec=true' // vite dev proxy; raw files still use JPL_HOST
+  : JPL_HOST;
+const EL_SOURCE =
+  '<a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL SBDB</a>'+
+  ' · '+
+  '<a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>';
+
+function elByName(elements, name){
+  for(let k=0;k<elements.length;k++){
+    if(elements[k].name === name) return parseFloat(elements[k].value);
+  }
+  return NaN;
+}
+
+function setElementsNote(html){
+  document.getElementById('el-note').innerHTML = html;
+}
+
+function applyJplElements(data){
+  if(elementsTouched) return;
+  const orbit = data && data.orbit;
+  const els = orbit && orbit.elements;
+  if(!els || !els.length) throw new Error('missing orbit.elements');
+  const a  = elByName(els, 'a');
+  const e  = elByName(els, 'e');
+  const i  = elByName(els, 'i');
+  const om = elByName(els, 'om');
+  const w  = elByName(els, 'w');
+  const ma = elByName(els, 'ma');
+  const epoch = parseFloat(orbit.epoch);
+  const orbitId = orbit.orbit_id;
+  if(![a,e,i,om,w,ma,epoch].every(v => Number.isFinite(v)) || orbitId==null)
+    throw new Error('incomplete elements');
+  if(elementsTouched) return;
+  document.getElementById('el-a').value  = a;
+  document.getElementById('el-e').value  = e;
+  document.getElementById('el-i').value  = i;
+  document.getElementById('el-om').value = om;
+  document.getElementById('el-w').value  = w;
+  document.getElementById('el-m').value  = ma;
+  astEpoch = epoch;
+  readElements();
+  const tags = document.querySelectorAll('#elements .tag');
+  for(const t of tags) t.textContent = 'JPL live';
+  setElementsNote(
+    'Live orbital elements from the JPL Small-Body Database, orbit solution '+orbitId+
+    ', epoch JD '+epoch+' (equinox J2000). Look it up yourself: '+EL_SOURCE+
+    '. Edit any value and everything recalculates live.'
+  );
+}
+
+function useCachedElementsNote(){
+  setElementsNote(
+    'Cached elements are in use (JPL SBDB fetch failed). '+
+    'Orbit solution 60, epoch JD 2461200.5 (equinox J2000). Look it up yourself: '+EL_SOURCE+
+    '. Edit any value and everything recalculates live.'
+  );
+}
+
+function fetchJplElements(){
+  const ctrl = new AbortController();
+  const timer = setTimeout(function(){ ctrl.abort(); }, 6000);
+  fetch(JPL_SBDB, {signal: ctrl.signal})
+    .then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    })
+    .then(function(data){ applyJplElements(data); })
+    .catch(function(err){
+      console.warn('JPL SBDB fetch failed; using cached elements.', err);
+      useCachedElementsNote();
+    })
+    .then(function(){ clearTimeout(timer); });
+}
+
+/* ================= state ================= */
+let simJD = jdFromDate(new Date());
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let playing = !reduced;
+let speed = 30; // days per second
+let scale = 0;  // px per AU, set on resize
+let panX = 0, panY = 0, zoom = 1;
+let trail = [];
+
+/* precomputed */
+let orbitPaths = {};   // sampled orbit polylines per body
+let chartData = null;  // {jd0, jd1, step, vals[], lo, hi}
+let approachInfo = null;
+
+function sampleOrbit(el, N=240){
+  const pts = [];
+  for(let k=0;k<=N;k++){
+    const jd = el.epoch + el.period * k/N;
+    const p = position(el, jd);
+    pts.push([p.x, p.y]);
+  }
+  return pts;
+}
+
+function rebuildStatics(){
+  orbitPaths = {};
+  for(const p of PLANETS) orbitPaths[p.name] = sampleOrbit(p);
+  orbitPaths[ast.name] = sampleOrbit(ast, 360);
+  trail = [];
+  rebuildChart(true);
+  rebuildApproach();
+  updateStaticStats();
+}
+
+function distAt(jd){
+  const pe = position(EARTH, jd);
+  const pa = position(ast, jd);
+  const dx=pa.x-pe.x, dy=pa.y-pe.y, dz=pa.z-pe.z;
+  return Math.sqrt(dx*dx+dy*dy+dz*dz);
+}
+
+function rebuildChart(recenter){
+  const today = jdFromDate(new Date());
+  let jd0, jd1;
+  if(recenter || !chartData){ jd0 = today-180; jd1 = today+730; }
+  else { jd0 = chartData.jd0; jd1 = chartData.jd1; }
+  if(simJD < jd0 || simJD > jd1){ jd0 = simJD-455; jd1 = simJD+455; }
+  const step = 2; // days
+  const vals = [];
+  let lo=1e9, hi=-1e9;
+  for(let jd=jd0; jd<=jd1; jd+=step){
+    const d = distAt(jd);
+    vals.push(d);
+    if(d<lo)lo=d; if(d>hi)hi=d;
+  }
+  chartData = {jd0, jd1, step, vals, lo, hi};
+  document.getElementById('chartrange').textContent = fmtDate(jd0)+' → '+fmtDate(jd1);
+  document.getElementById('bandlo').textContent = 'low '+lo.toFixed(3)+' AU';
+  document.getElementById('bandhi').textContent = 'high '+hi.toFixed(3)+' AU';
+}
+
+function rebuildApproach(){
+  const today = jdFromDate(new Date());
+  let best = {jd: today, d: 1e9};
+  let prev = distAt(today);
+  for(let jd=today+1; jd<=today+1461; jd+=1){
+    const d = distAt(jd);
+    if(d < best.d){ best = {jd, d}; }
+    prev = d;
+  }
+  approachInfo = best;
+  document.getElementById('approachv').innerHTML =
+    fmtDate(best.jd)+' · <em>'+best.d.toFixed(3)+' AU</em> ('+Math.round(best.d*AU_KM/1e6)+'M km)';
+}
+
+function updateStaticStats(){
+  const peri = ast.a*(1-ast.e), aph = ast.a*(1+ast.e);
+  document.getElementById('s-peri').textContent = peri.toFixed(3)+' AU';
+  document.getElementById('s-aph').textContent  = aph.toFixed(3)+' AU';
+  document.getElementById('s-per').textContent  = (ast.period/365.25).toFixed(2)+' yr';
+  document.getElementById('s-ecc').textContent  = ast.e.toFixed(6);
+}
+
+/* ================= orbit map ================= */
+const map = document.getElementById('orbitmap');
+const mctx = map.getContext('2d');
+let stars = [];
+
+function resize(){
+  const w = map.clientWidth, h = map.clientHeight;
+  const dpr = window.devicePixelRatio || 1;
+  map.width = w*dpr; map.height = h*dpr;
+  mctx.setTransform(dpr,0,0,dpr,0,0);
+  const maxR = Math.max(ast ? ast.a*(1+ast.e) : 3.4, 1.6) * 1.15;
+  scale = Math.min(w,h) / (2*maxR);
+  // starfield, seeded
+  stars = [];
+  let s = 42;
+  const rnd = ()=>{ s = (s*16807)%2147483647; return s/2147483647; };
+  for(let k=0;k<Math.floor(w*h/4500);k++)
+    stars.push([rnd()*w, rnd()*h, rnd()*1.3+0.3, rnd()*0.5+0.15]);
+}
+window.addEventListener('resize', resize);
+
+function toPx(x,y){
+  const w = map.clientWidth, h = map.clientHeight;
+  return [w/2 + (x*scale*zoom) + panX, h/2 - (y*scale*zoom) + panY];
+}
+
+function drawMap(){
+  const w = map.clientWidth, h = map.clientHeight;
+  mctx.clearRect(0,0,w,h);
+
+  // stars
+  for(const [x,y,r,a] of stars){
+    mctx.globalAlpha = a;
+    mctx.fillStyle = '#9fb59f';
+    mctx.fillRect(x,y,r,r);
+  }
+  mctx.globalAlpha = 1;
+
+  // sun
+  const [sx,sy] = toPx(0,0);
+  const g = mctx.createRadialGradient(sx,sy,0,sx,sy,26);
+  g.addColorStop(0,'#fff7d6'); g.addColorStop(0.35,'#ffd23f'); g.addColorStop(1,'rgba(255,150,0,0)');
+  mctx.fillStyle = g;
+  mctx.beginPath(); mctx.arc(sx,sy,26,0,7); mctx.fill();
+
+  // planet orbits + bodies
+  for(const p of PLANETS){
+    mctx.strokeStyle = 'rgba(120,140,120,0.28)';
+    mctx.lineWidth = 1;
+    mctx.beginPath();
+    orbitPaths[p.name].forEach(([x,y],k)=>{
+      const [px,py]=toPx(x,y);
+      k?mctx.lineTo(px,py):mctx.moveTo(px,py);
+    });
+    mctx.stroke();
+    const pos = position(p, simJD);
+    const [px,py] = toPx(pos.x,pos.y);
+    mctx.fillStyle = p.col;
+    mctx.beginPath(); mctx.arc(px,py,p.rad,0,7); mctx.fill();
+    if(p.name==='Earth'){
+      mctx.strokeStyle='rgba(74,163,255,0.5)';
+      mctx.beginPath(); mctx.arc(px,py,p.rad+4,0,7); mctx.stroke();
+    }
+    mctx.fillStyle = 'rgba(150,170,150,0.75)';
+    mctx.font = '11px '+getComputedStyle(document.body).fontFamily;
+    mctx.fillText(p.name, px+8, py-8);
+  }
+
+  // asteroid orbit — the green line
+  mctx.strokeStyle = 'rgba(0,200,5,0.55)';
+  mctx.lineWidth = 1.5;
+  mctx.setLineDash([5,4]);
+  mctx.beginPath();
+  orbitPaths[ast.name].forEach(([x,y],k)=>{
+    const [px,py]=toPx(x,y);
+    k?mctx.lineTo(px,py):mctx.moveTo(px,py);
+  });
+  mctx.stroke();
+  mctx.setLineDash([]);
+
+  const apos = position(ast, simJD);
+  const epos = position(EARTH, simJD);
+  const [ax,ay] = toPx(apos.x,apos.y);
+  const [ex,ey] = toPx(epos.x,epos.y);
+
+  // connection line asteroid↔earth
+  mctx.strokeStyle = 'rgba(0,200,5,0.25)';
+  mctx.lineWidth = 1;
+  mctx.setLineDash([2,5]);
+  mctx.beginPath(); mctx.moveTo(ax,ay); mctx.lineTo(ex,ey); mctx.stroke();
+  mctx.setLineDash([]);
+
+  // trail
+  trail.push([apos.x,apos.y]);
+  if(trail.length>90) trail.shift();
+  mctx.lineWidth = 2;
+  for(let k=1;k<trail.length;k++){
+    mctx.globalAlpha = k/trail.length*0.7;
+    mctx.strokeStyle = '#00c805';
+    const [x1,y1]=toPx(...trail[k-1]), [x2,y2]=toPx(...trail[k]);
+    mctx.beginPath(); mctx.moveTo(x1,y1); mctx.lineTo(x2,y2); mctx.stroke();
+  }
+  mctx.globalAlpha = 1;
+
+  // asteroid marker w/ glow
+  const ag = mctx.createRadialGradient(ax,ay,0,ax,ay,14);
+  ag.addColorStop(0,'rgba(0,200,5,0.9)'); ag.addColorStop(1,'rgba(0,200,5,0)');
+  mctx.fillStyle = ag;
+  mctx.beginPath(); mctx.arc(ax,ay,14,0,7); mctx.fill();
+  mctx.fillStyle = '#aef7b0';
+  mctx.beginPath(); mctx.arc(ax,ay,3.5,0,7); mctx.fill();
+  mctx.fillStyle = '#00c805';
+  mctx.font = '700 12px '+getComputedStyle(document.body).fontFamily;
+  mctx.fillText('RH-18932', ax+10, ay+4);
+}
+
+/* pan / zoom */
+let dragging=false, lastX=0, lastY=0;
+map.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;map.setPointerCapture(e.pointerId)});
+map.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  panX += e.clientX-lastX; panY += e.clientY-lastY;
+  lastX=e.clientX; lastY=e.clientY;
+});
+map.addEventListener('pointerup',()=>dragging=false);
+map.addEventListener('wheel',e=>{
+  e.preventDefault();
+  zoom *= e.deltaY<0 ? 1.1 : 0.9;
+  zoom = Math.min(12, Math.max(0.35, zoom));
+},{passive:false});
+
+/* ================= chart ================= */
+const chart = document.getElementById('distchart');
+const cctx = chart.getContext('2d');
+function drawChart(){
+  const w = chart.clientWidth, h = 130;
+  const dpr = window.devicePixelRatio||1;
+  if(chart.width !== w*dpr){ chart.width=w*dpr; chart.height=h*dpr; }
+  cctx.setTransform(dpr,0,0,dpr,0,0);
+  cctx.clearRect(0,0,w,h);
+  if(!chartData) return;
+  const {jd0,jd1,step,vals,lo,hi} = chartData;
+  const pad = (hi-lo)*0.08 || 0.05;
+  const y = d => h-8 - ((d-lo+pad)/(hi-lo+2*pad))*(h-16);
+  const x = jd => ((jd-jd0)/(jd1-jd0))*w;
+
+  // today marker
+  const today = jdFromDate(new Date());
+  if(today>=jd0 && today<=jd1){
+    cctx.strokeStyle='rgba(150,170,150,0.3)';
+    cctx.setLineDash([2,4]);
+    cctx.beginPath(); cctx.moveTo(x(today),0); cctx.lineTo(x(today),h); cctx.stroke();
+    cctx.setLineDash([]);
+  }
+
+  // area fill
+  cctx.beginPath();
+  vals.forEach((d,k)=>{
+    const px = x(jd0+k*step), py=y(d);
+    k?cctx.lineTo(px,py):cctx.moveTo(px,py);
+  });
+  const lastX_ = x(jd0+(vals.length-1)*step);
+  cctx.lineTo(lastX_,h); cctx.lineTo(0,h); cctx.closePath();
+  const grad = cctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'rgba(0,200,5,0.18)'); grad.addColorStop(1,'rgba(0,200,5,0)');
+  cctx.fillStyle=grad; cctx.fill();
+
+  // line
+  cctx.strokeStyle='#00c805'; cctx.lineWidth=1.8;
+  cctx.beginPath();
+  vals.forEach((d,k)=>{
+    const px = x(jd0+k*step), py=y(d);
+    k?cctx.lineTo(px,py):cctx.moveTo(px,py);
+  });
+  cctx.stroke();
+
+  // current point
+  if(simJD>=jd0 && simJD<=jd1){
+    const d = distAt(simJD);
+    cctx.fillStyle='#aef7b0';
+    cctx.beginPath(); cctx.arc(x(simJD), y(d), 3.5, 0, 7); cctx.fill();
+    cctx.strokeStyle='rgba(0,200,5,0.6)';
+    cctx.beginPath(); cctx.arc(x(simJD), y(d), 7, 0, 7); cctx.stroke();
+  }
+}
+
+/* ================= readouts ================= */
+function updateReadouts(){
+  const d  = distAt(simJD);
+  const d1 = distAt(simJD+1);
+  const rateKmDay = (d1-d)*AU_KM;
+  const closing = rateKmDay < 0;
+
+  document.getElementById('bigdist').innerHTML = d.toFixed(4)+' <span>AU</span>';
+  document.getElementById('kmline').textContent = Math.round(d*AU_KM).toLocaleString('en-US')+' km from Earth';
+
+  const delta = document.getElementById('delta');
+  delta.className = closing?'closing':'receding';
+  delta.querySelector('.arrow').textContent = closing?'▼':'▲';
+  document.getElementById('deltatxt').textContent =
+    (closing?'closing ':'receding ')+Math.abs(Math.round(rateKmDay)).toLocaleString('en-US')+' km/day';
+
+  const apos = position(ast, simJD);
+  document.getElementById('s-helio').textContent = apos.r.toFixed(3)+' AU';
+  document.getElementById('s-vel').textContent = orbitalSpeed(ast.a, apos.r).toFixed(2)+' km/s';
+
+  document.getElementById('datestr').textContent = fmtDate(simJD);
+}
+
+/* ================= loop / controls ================= */
+let lastT = performance.now();
+function loop(t){
+  const dt = Math.min(0.1, (t-lastT)/1000);
+  lastT = t;
+  if(playing) simJD += speed*dt;
+  if(chartData && (simJD < chartData.jd0 || simJD > chartData.jd1)) rebuildChart(false);
+  drawMap();
+  drawChart();
+  updateReadouts();
+  requestAnimationFrame(loop);
+}
+
+const playbtn = document.getElementById('playbtn');
+function setPlaying(p){
+  playing = p;
+  playbtn.textContent = p ? 'Pause' : 'Play';
+}
+playbtn.addEventListener('click',()=>setPlaying(!playing));
+document.getElementById('todaybtn').addEventListener('click',()=>{
+  simJD = jdFromDate(new Date());
+  trail = [];
+  rebuildChart(true);
+});
+const scrubEl = document.getElementById('scrub');
+function speedFromScrub(v){ // 0..100 → 0.5 .. 3000 d/s, log
+  return 0.5*Math.pow(6000, v/100);
+}
+function updateSpeedLabel(){
+  const l = document.getElementById('speedlabel');
+  l.textContent = speed >= 365 ? (speed/365.25).toFixed(1)+' yr/s' : Math.round(speed)+' d/s';
+}
+scrubEl.addEventListener('input',()=>{ speed = speedFromScrub(+scrubEl.value); updateSpeedLabel(); });
+document.getElementById('slower').addEventListener('click',()=>{ scrubEl.value=Math.max(0,+scrubEl.value-8); scrubEl.dispatchEvent(new Event('input')); });
+document.getElementById('faster').addEventListener('click',()=>{ scrubEl.value=Math.min(100,+scrubEl.value+8); scrubEl.dispatchEvent(new Event('input')); });
+scrubEl.value = 47; speed = speedFromScrub(47); updateSpeedLabel();
+
+for(const id of ['el-a','el-e','el-i','el-om','el-w','el-m']){
+  const inp = document.getElementById(id);
+  inp.addEventListener('input', function(){ elementsTouched = true; });
+  inp.addEventListener('change', readElements);
+}
+
+/* ================= boot ================= */
+readElements();
+resize();
+setPlaying(!reduced);
+requestAnimationFrame(loop);
+fetchJplElements();
+</script>
+</body>
+</html>

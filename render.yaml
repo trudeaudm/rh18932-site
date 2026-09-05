@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: rh18932-tracker
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
