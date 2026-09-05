@@ -245,7 +245,7 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
   .sizeviz .icon-everest{height:150px}
 }
 @media (prefers-reduced-motion:reduce){
-  /* sim starts paused; sky stays still — both handled in JS */
+  /* animations stay on — this desk is supposed to move */
 }
 </style>
 </head>
@@ -440,7 +440,6 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
   const sky = document.getElementById('sky');
   if(!sky) return;
   const ctx = sky.getContext('2d');
-  const quiet = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let stars = [], w = 0, h = 0;
 
   function seed(){
@@ -475,7 +474,7 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
     const sec = (t || 0) / 1000;
     for(let i = 0; i < stars.length; i++){
       const st = stars[i];
-      const tw = quiet ? st.base : st.base + Math.sin(sec * st.sp + st.ph) * st.amp;
+      const tw = st.base + Math.sin(sec * st.sp + st.ph) * st.amp;
       const a = tw < 0.06 ? 0.06 : (tw > 1 ? 1 : tw);
       ctx.fillStyle = st.green ? '#9ee6a0' : '#e8f2e8';
       if(st.flare){
@@ -506,16 +505,12 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
       }
     }
     ctx.globalAlpha = 1;
-    if(!quiet) requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
   }
 
   seed();
-  window.addEventListener('resize', function(){
-    seed();
-    if(quiet) draw(0);
-  });
-  if(quiet) draw(0);
-  else requestAnimationFrame(draw);
+  window.addEventListener('resize', seed);
+  requestAnimationFrame(draw);
 })();
 
 /* ================= math ================= */
@@ -694,8 +689,7 @@ function fetchJplElements(){
 
 /* ================= state ================= */
 let simJD = jdFromDate(new Date());
-const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let playing = !reduced;
+let playing = true;
 let speed = 30; // days per second
 let scale = 0;  // px per AU, set on resize
 let panX = 0, panY = 0, zoom = 1;
@@ -1228,7 +1222,7 @@ if(/belt|lfg|hood/.test(location.hash)){
 /* ================= boot ================= */
 readElements();
 resize();
-setPlaying(!reduced);
+setPlaying(true);
 requestAnimationFrame(loop);
 fetchJplElements();
 </script>
