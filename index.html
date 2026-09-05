@@ -10,98 +10,156 @@
 <meta property="og:image" content="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#000000;
-  --panel:#0a0f0a;
-  --panel2:#0e150e;
-  --line:#1b241b;
+  --bg:#050805;
+  --panel:#0c120c;
+  --panel2:#101810;
+  --line:#1c261c;
   --green:#00c805;
   --green-dim:#0a5c0e;
   --orange:#ff5000;
-  --ink:#e6f2e6;
-  --mut:#6f8270;
+  --ink:#eef6ee;
+  --mut:#7a8d7b;
   --font:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --radius:16px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
+html,body{min-height:100%}
 body{
   background:var(--bg);
   color:var(--ink);
   font-family:var(--font);
-  overflow:hidden;
 }
-#app{display:flex;height:100vh}
+#page{max-width:1120px;margin:0 auto;padding:22px 20px 48px}
 
-/* ---------- left: orbit map ---------- */
-#mapwrap{flex:1;position:relative;min-width:0}
+#sitehead{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+#sitehead .logo{
+  width:56px;height:56px;border-radius:50%;
+  border:1px solid var(--line);
+  box-shadow:0 0 18px rgba(0,200,5,.14);
+}
+#sitehead .brand{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--green)}
+#sitehead .chip{
+  display:inline-block;margin-top:6px;font-size:11px;font-weight:700;letter-spacing:.06em;
+  color:#001c01;background:var(--green);border-radius:4px;padding:3px 8px;
+}
+
+.hero{margin-bottom:22px}
+.hero h1{font-size:56px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.hero .des{font-size:20px;color:var(--mut);font-family:var(--mono);margin-top:6px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badges span{
+  font-size:12px;font-weight:500;color:var(--mut);
+  border:1px solid var(--line);background:var(--panel);
+  border-radius:999px;padding:5px 10px;
+}
+.badges .ok{color:var(--green);border-color:var(--green-dim);background:rgba(0,200,5,.08)}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:18px 20px;
+}
+.card-k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+
+.split{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-bottom:14px}
+#quote{display:flex;flex-direction:column;justify-content:center;min-height:280px}
+#bigkm{
+  font-family:var(--mono);font-size:42px;font-weight:600;
+  color:var(--green);font-variant-numeric:tabular-nums;line-height:1.05;letter-spacing:-.03em;
+}
+#bigkm small{display:block;font-size:14px;color:var(--mut);font-weight:500;margin-top:4px}
+.subs{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-family:var(--mono);font-size:13px;color:var(--mut)}
+#bigdist{font-variant-numeric:tabular-nums}
+#bigdist span{color:var(--mut)}
+#delta{
+  display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+  margin-top:16px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;
+  padding:5px 10px;border-radius:8px;
+}
+#delta.closing{color:var(--green);background:rgba(0,200,5,.1)}
+#delta.receding{color:var(--orange);background:rgba(255,80,0,.1)}
+#delta .arrow{font-size:15px;line-height:1}
+
+#mapcard{padding:16px 16px 12px}
+#mapwrap{position:relative;height:420px;border-radius:12px;overflow:hidden;background:#000}
 #orbitmap{display:block;width:100%;height:100%;cursor:grab}
 #orbitmap:active{cursor:grabbing}
-#maphead{
-  position:absolute;top:0;left:0;right:0;
-  padding:18px 22px;
-  display:flex;align-items:baseline;gap:14px;
-  pointer-events:none;
-}
-#maphead h1{
-  font-size:15px;font-weight:700;letter-spacing:.04em;color:var(--green);
-}
-#maphead .sub{font-size:12px;color:var(--mut)}
 #simdate{
-  position:absolute;left:22px;bottom:66px;
-  font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;
+  position:absolute;left:14px;bottom:58px;
+  font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;
   pointer-events:none;
 }
-#simdate small{display:block;font-size:11px;font-weight:400;color:var(--mut);letter-spacing:.03em}
-
+#simdate small{display:block;font-size:10px;font-weight:400;color:var(--mut);letter-spacing:.04em}
 #timebar{
   position:absolute;left:0;right:0;bottom:0;
-  display:flex;align-items:center;gap:10px;
-  padding:12px 22px;
-  background:linear-gradient(transparent,rgba(0,0,0,.85) 40%);
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;
+  background:linear-gradient(transparent,rgba(0,0,0,.88) 40%);
 }
 #timebar button{
   background:var(--panel2);border:1px solid var(--line);color:var(--ink);
-  font-family:var(--font);font-size:13px;font-weight:500;
-  padding:8px 14px;border-radius:999px;cursor:pointer;
+  font-family:var(--font);font-size:12px;font-weight:500;
+  padding:6px 12px;border-radius:999px;cursor:pointer;
 }
 #timebar button:hover{border-color:var(--green-dim)}
 #timebar button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
-#timebar button.primary{background:var(--green);color:#001c01;border-color:var(--green);font-weight:700;min-width:78px}
-#scrub{flex:1;accent-color:var(--green);cursor:pointer;min-width:60px}
-#speedlabel{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:92px;text-align:right}
+#timebar button.primary{background:var(--green);color:#001c01;border-color:var(--green);font-weight:700;min-width:70px}
+#scrub{flex:1;accent-color:var(--green);cursor:pointer;min-width:40px}
+#speedlabel{font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:72px;text-align:right}
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:10px 4px 2px;font-size:12px;color:var(--mut)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend img{width:18px;height:18px;border-radius:50%;object-fit:cover}
+.legend .dot{width:9px;height:9px;border-radius:50%}
+.legend .earth{background:#4aa3ff}
 
-/* ---------- right: terminal panel ---------- */
-#panel{
-  width:380px;flex-shrink:0;
-  background:var(--panel);
-  border-left:1px solid var(--line);
-  display:flex;flex-direction:column;
-  overflow-y:auto;
-}
-#pair{padding:20px 20px 6px;display:flex;align-items:center;gap:14px}
-#pair .logo{
-  width:68px;height:68px;border-radius:50%;flex-shrink:0;
-  border:1px solid var(--line);
-  box-shadow:0 0 18px rgba(0,200,5,.12);
-}
-#pair .chip{
-  display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
-  color:#001c01;background:var(--green);border-radius:4px;padding:3px 8px;
-}
-#pair h2{font-size:19px;font-weight:700;margin-top:10px}
-#pair .fullname{font-size:12px;color:var(--mut);margin-top:2px}
+#stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+#stats .k{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+#stats .v{font-family:var(--mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:8px}
+#stats .s{font-size:12px;color:var(--mut);margin-top:4px}
 
-#contract{
-  padding:10px 20px 14px;border-bottom:1px solid var(--line);
+#size{margin-bottom:14px}
+#size .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+#size h2{font-size:22px;color:var(--green);font-weight:700}
+#size .pct{font-family:var(--mono);font-size:22px;color:var(--ink)}
+.sizeviz{display:flex;align-items:flex-end;justify-content:center;gap:48px;min-height:180px;padding:8px 10px 0}
+.sizeviz .side{text-align:center}
+.sizeviz img{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(0,200,5,.18))}
+.sizeviz .cap{margin-top:8px;font-size:13px;font-weight:700;color:var(--green)}
+.sizeviz .everest{
+  width:0;height:0;
+  border-left:70px solid transparent;
+  border-right:70px solid transparent;
+  border-bottom:168px solid #d8e0d8;
+  filter:drop-shadow(0 0 10px rgba(255,255,255,.08));
 }
-#contract .k{font-size:11px;color:var(--mut)}
-#contract .row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.sizeviz .everest-cap{color:var(--ink)}
+#size .blurb{margin-top:16px;font-size:14px;color:var(--mut)}
+
+#chartbox{margin-bottom:14px}
+#chartbox .charthead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+#chartbox .charthead .t{font-size:12px;color:var(--mut)}
+#chartbox .charthead .range{font-size:11px;color:var(--mut);font-family:var(--mono)}
+#distchart{display:block;width:100%;height:130px}
+#band{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--mut);font-family:var(--mono);
+  padding:8px 0 0;
+}
+
+#approach{margin-bottom:14px}
+#approach .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+#approach .v em{font-style:normal;color:var(--green)}
+
+#contract{margin-bottom:14px}
+#contract .row{display:flex;align-items:center;gap:8px}
 #contract .v{
-  flex:1;min-width:0;
-  font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;
-  word-break:break-all;line-height:1.35;
+  flex:1;min-width:0;font-family:var(--mono);font-size:13px;
+  word-break:break-all;line-height:1.4;
 }
 #contract button{
   flex-shrink:0;
@@ -112,54 +170,15 @@ body{
 #contract button:hover{border-color:var(--green-dim)}
 #contract button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 
-#quote{padding:8px 20px 16px;border-bottom:1px solid var(--line)}
-#bigdist{font-size:42px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.05}
-#bigdist span{font-size:18px;color:var(--mut);font-weight:500}
-#kmline{font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums;margin-top:2px}
-#delta{
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:10px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;
-  padding:4px 10px;border-radius:6px;
-}
-#delta.closing{color:var(--green);background:rgba(0,200,5,.1)}
-#delta.receding{color:var(--orange);background:rgba(255,80,0,.1)}
-#delta .arrow{font-size:15px;line-height:1}
-
-#chartbox{padding:14px 20px 4px;border-bottom:1px solid var(--line)}
-#chartbox .charthead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
-#chartbox .charthead .t{font-size:12px;color:var(--mut)}
-#chartbox .charthead .range{font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums}
-#distchart{display:block;width:100%;height:130px}
-#band{
-  display:flex;justify-content:space-between;
-  font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;
-  padding:8px 0 12px;
-}
-
-#approach{padding:14px 20px;border-bottom:1px solid var(--line)}
-#approach .t{font-size:12px;color:var(--mut);margin-bottom:4px}
-#approach .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
-#approach .v em{font-style:normal;color:var(--green)}
-
-#stats{
-  display:grid;grid-template-columns:1fr 1fr;
-  border-bottom:1px solid var(--line);
-}
-#stats>div{padding:12px 20px;border-top:1px solid var(--line)}
-#stats>div:nth-child(-n+2){border-top:none}
-#stats>div:nth-child(odd){border-right:1px solid var(--line)}
-#stats .k{font-size:11px;color:var(--mut)}
-#stats .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
-
-details#elements{border-bottom:1px solid var(--line)}
+details#elements{margin-bottom:14px}
 details#elements summary{
-  padding:14px 20px;font-size:13px;font-weight:500;cursor:pointer;
+  padding:0;font-size:13px;font-weight:500;cursor:pointer;
   color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;
 }
 details#elements summary::after{content:"+";color:var(--mut);font-size:16px}
 details#elements[open] summary::after{content:"–"}
-details#elements summary:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
-#elements .body{padding:0 20px 16px}
+details#elements summary:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+#elements .body{padding:14px 0 0}
 #elements .note{font-size:12px;color:var(--mut);line-height:1.5;margin-bottom:12px}
 #elements .note a{color:var(--green);text-decoration:none;border-bottom:1px solid var(--green-dim)}
 #elements .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
@@ -168,7 +187,7 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
 #elements input{
   width:100%;margin-top:4px;
   background:var(--panel2);border:1px solid var(--line);border-radius:6px;
-  color:var(--ink);font-family:var(--font);font-size:13px;font-variant-numeric:tabular-nums;
+  color:var(--ink);font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;
   padding:7px 9px;
 }
 #elements input:focus{outline:none;border-color:var(--green-dim)}
@@ -178,18 +197,19 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
 #elements input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 #elements input[type=number]{-moz-appearance:textfield}
 #elements .tag{font-size:10px;color:var(--green)}
-#elements .tag.ph{color:var(--orange)}
 
-#foot{padding:14px 20px;font-size:11px;color:var(--mut);line-height:1.6;margin-top:auto}
+#foot{font-size:12px;color:var(--mut);line-height:1.65}
 #foot a{color:var(--green);text-decoration:none;border-bottom:1px solid var(--green-dim)}
-#foot .ca{color:var(--ink);font-variant-numeric:tabular-nums;word-break:break-all}
+#foot .ca{color:var(--ink);font-family:var(--mono);word-break:break-all}
 
-@media (max-width:860px){
-  body{overflow:auto}
-  #app{flex-direction:column;height:auto}
-  #mapwrap{height:58vh;flex:none}
-  #panel{width:100%;border-left:none;border-top:1px solid var(--line)}
-  #bigdist{font-size:34px}
+@media (max-width:900px){
+  .hero h1{font-size:40px}
+  .split{grid-template-columns:1fr}
+  #stats{grid-template-columns:1fr 1fr}
+  #mapwrap{height:58vh;min-height:320px}
+  #bigkm{font-size:32px}
+  .sizeviz{gap:28px}
+  .sizeviz .everest{border-left-width:52px;border-right-width:52px;border-bottom-width:124px}
 }
 @media (prefers-reduced-motion:reduce){
   /* sim starts paused; handled in JS via this query */
@@ -197,113 +217,150 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
 </style>
 </head>
 <body>
-<div id="app">
+<div id="page">
 
-  <div id="mapwrap">
-    <canvas id="orbitmap"></canvas>
-    <div id="maphead">
-      <h1>ROBINHOOD CHAIN · DEEP SPACE DESK</h1>
-      <div class="sub">heliocentric view · ecliptic plane · red = Starman · scroll out for ice giants and Pluto · drag to pan</div>
+  <header id="sitehead">
+    <img class="logo" src="assets/logo.png" alt="18932 Robinhood badge — an asteroid wearing a Robin Hood hat">
+    <div>
+      <div class="brand">ROBINHOOD CHAIN · DEEP SPACE DESK</div>
+      <span class="chip">$RH-18932</span>
     </div>
-    <div id="simdate"><small>SIMULATION DATE</small><span id="datestr">—</span></div>
-    <div id="timebar">
-      <button id="playbtn" class="primary" aria-label="Play or pause simulation">Pause</button>
-      <button id="todaybtn">Today</button>
-      <button id="slower" aria-label="Slower">−</button>
-      <input type="range" id="scrub" min="0" max="100" value="50" aria-label="Simulation speed">
-      <button id="faster" aria-label="Faster">+</button>
-      <div id="speedlabel">30 d/s</div>
-    </div>
-  </div>
+  </header>
 
-  <div id="panel">
-    <div id="pair">
-      <img class="logo" src="assets/logo.png" alt="18932 Robinhood badge — an asteroid wearing a Robin Hood hat">
-      <div>
-        <span class="chip">$RH-18932</span>
-        <h2>RH-18932 / EARTH</h2>
-        <div class="fullname">18932 Robinhood (2000 QH35) · 3.75 km · main-belt asteroid · proximity pair</div>
+  <section class="hero">
+    <h1>Robinhood</h1>
+    <div class="des">18932 · 2000 QH35</div>
+    <div class="badges">
+      <span class="ok">Not hazardous</span>
+      <span>MBA</span>
+      <span>3.75 km</span>
+    </div>
+  </section>
+
+  <section class="split">
+    <div class="card" id="quote">
+      <div class="card-k">Current distance from Earth</div>
+      <div id="bigkm">—<small>km</small></div>
+      <div class="subs">
+        <span id="lunarline">—</span>
+        <span id="bigdist">— <span>AU</span></span>
       </div>
-    </div>
-
-    <div id="contract">
-      <div class="k">Contract</div>
-      <div class="row">
-        <div class="v" id="ca">0x5759A852243A56A48853Af1d28fd4e0f33747C9B</div>
-        <button type="button" id="copyca">Copy</button>
-      </div>
-    </div>
-
-    <div id="quote">
-      <div id="bigdist">— <span>AU</span></div>
-      <div id="kmline">—</div>
       <div id="delta" class="closing"><span class="arrow">▼</span><span id="deltatxt">—</span></div>
     </div>
 
-    <div id="chartbox">
-      <div class="charthead">
-        <div class="t">Distance to Earth</div>
-        <div class="range" id="chartrange">—</div>
-      </div>
-      <canvas id="distchart" height="130"></canvas>
-      <div id="band"><span id="bandlo">low —</span><span id="bandhi">high —</span></div>
-    </div>
-
-    <div id="approach">
-      <div class="t">Next close approach (4-yr scan)</div>
-      <div class="v" id="approachv">—</div>
-    </div>
-
-    <div id="stats">
-      <div><div class="k">Perihelion</div><div class="v" id="s-peri">—</div></div>
-      <div><div class="k">Aphelion</div><div class="v" id="s-aph">—</div></div>
-      <div><div class="k">Orbital period</div><div class="v" id="s-per">—</div></div>
-      <div><div class="k">Heliocentric dist.</div><div class="v" id="s-helio">—</div></div>
-      <div><div class="k">Orbital speed</div><div class="v" id="s-vel">—</div></div>
-      <div><div class="k">Eccentricity</div><div class="v" id="s-ecc">—</div></div>
-      <div><div class="k">Diameter</div><div class="v">3.75 km</div></div>
-      <div><div class="k">Abs. magnitude H</div><div class="v">14.88</div></div>
-    </div>
-
-    <details id="elements">
-      <summary>Orbital elements</summary>
-      <div class="body">
-        <div class="note" id="el-note">
-          All six elements are from the JPL Small-Body Database, orbit solution 60,
-          epoch JD 2461200.5 (equinox J2000). Look it up yourself:
-          <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL SBDB</a>
-          ·
-          <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
-        </div>
-        <div class="grid">
-          <label><b>a</b> semi-major axis, AU <span class="tag">JPL</span>
-            <input id="el-a" class="confirmed" type="number" step="any" value="2.348928725809226" readonly tabindex="-1"></label>
-          <label><b>e</b> eccentricity <span class="tag">JPL</span>
-            <input id="el-e" class="confirmed" type="number" step="any" value="0.2365493866662888" readonly tabindex="-1"></label>
-          <label><b>i</b> inclination, ° <span class="tag">JPL</span>
-            <input id="el-i" class="confirmed" type="number" step="any" value="2.576837989836605" readonly tabindex="-1"></label>
-          <label><b>Ω</b> asc. node, ° <span class="tag">JPL</span>
-            <input id="el-om" class="confirmed" type="number" step="any" value="37.19373899418512" readonly tabindex="-1"></label>
-          <label><b>ω</b> arg. perihelion, ° <span class="tag">JPL</span>
-            <input id="el-w" class="confirmed" type="number" step="any" value="275.3609425297252" readonly tabindex="-1"></label>
-          <label><b>M₀</b> mean anomaly @ epoch, ° <span class="tag">JPL</span>
-            <input id="el-m" class="confirmed" type="number" step="any" value="75.34840192021278" readonly tabindex="-1"></label>
+    <div class="card" id="mapcard">
+      <div class="card-k">Heliocentric orbit · top-down · live</div>
+      <div id="mapwrap">
+        <canvas id="orbitmap"></canvas>
+        <div id="simdate"><small>SIMULATION DATE</small><span id="datestr">—</span></div>
+        <div id="timebar">
+          <button id="playbtn" class="primary" aria-label="Play or pause simulation">Pause</button>
+          <button id="todaybtn">Today</button>
+          <button id="slower" aria-label="Slower">−</button>
+          <input type="range" id="scrub" min="0" max="100" value="50" aria-label="Simulation speed">
+          <button id="faster" aria-label="Faster">+</button>
+          <div id="speedlabel">30 d/s</div>
         </div>
       </div>
-    </details>
-
-    <div id="foot">
-      Contract
-      <span class="ca">0x5759A852243A56A48853Af1d28fd4e0f33747C9B</span>.
-      Look up 18932 Robinhood at the
-      <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL Small-Body Database</a>
-      or the
-      <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
-      Two-body Keplerian propagation. Planets use J2000 mean elements; Ceres and Pluto use JPL SBDB.
-      The red orbit is Tesla Roadster / Starman (Horizons s11). Positions are illustrative, not
-      ephemeris-grade. Green means the rock is closing on Earth. Not financial advice,
-      not planetary-defense advice.
+      <div class="legend">
+        <span><i class="dot earth"></i> Earth</span>
+        <span><img src="assets/marker-robinhood.png" alt=""> Robinhood</span>
+        <span><img src="assets/marker-starman.png" alt=""> Starman</span>
+        <span>Scroll out for ice giants and Pluto</span>
+      </div>
     </div>
+  </section>
+
+  <section id="stats">
+    <div class="card"><div class="k">Orbit class</div><div class="v">MBA</div><div class="s">around the Sun</div></div>
+    <div class="card"><div class="k">Orbital period</div><div class="v" id="s-per">—</div><div class="s">Keplerian year</div></div>
+    <div class="card"><div class="k">Diameter</div><div class="v">3.75 km</div><div class="s">NEOWISE · ~42% of Everest</div></div>
+    <div class="card"><div class="k">Eccentricity</div><div class="v" id="s-ecc">—</div><div class="s">orbit shape</div></div>
+    <div class="card"><div class="k">Inclination</div><div class="v">2.58°</div><div class="s">to the ecliptic</div></div>
+    <div class="card"><div class="k">Perihelion</div><div class="v" id="s-peri">—</div><div class="s">closest to the Sun</div></div>
+    <div class="card"><div class="k">Aphelion</div><div class="v" id="s-aph">—</div><div class="s">farthest from the Sun</div></div>
+    <div class="card"><div class="k">Abs. magnitude H</div><div class="v">14.88</div><div class="s">heliocentric dist. <span id="s-helio">—</span></div></div>
+  </section>
+  <div id="s-vel" hidden></div>
+
+  <section class="card" id="size">
+    <div class="top">
+      <h2>Size in perspective</h2>
+      <div class="pct">42%</div>
+    </div>
+    <div class="sizeviz">
+      <div class="side">
+        <img src="assets/marker-robinhood.png" alt="Robinhood asteroid wearing a hat">
+        <div class="cap">Robinhood</div>
+      </div>
+      <div class="side">
+        <div class="everest" role="img" aria-label="Mount Everest silhouette"></div>
+        <div class="cap everest-cap">Mount Everest</div>
+      </div>
+    </div>
+    <div class="blurb">Robinhood is about 42% the height of Mount Everest — a 3.75 km rock next to an 8.85 km mountain.</div>
+  </section>
+
+  <section class="card" id="chartbox">
+    <div class="charthead">
+      <div class="t">Distance to Earth</div>
+      <div class="range" id="chartrange">—</div>
+    </div>
+    <canvas id="distchart" height="130"></canvas>
+    <div id="band"><span id="bandlo">low —</span><span id="bandhi">high —</span></div>
+  </section>
+
+  <section class="card" id="approach">
+    <div class="card-k">Next close approach (4-yr scan)</div>
+    <div class="v" id="approachv">—</div>
+  </section>
+
+  <section class="card" id="contract">
+    <div class="card-k">Contract</div>
+    <div class="row">
+      <div class="v" id="ca">0x5759A852243A56A48853Af1d28fd4e0f33747C9B</div>
+      <button type="button" id="copyca">Copy</button>
+    </div>
+  </section>
+
+  <details class="card" id="elements">
+    <summary>Orbital elements</summary>
+    <div class="body">
+      <div class="note" id="el-note">
+        All six elements are from the JPL Small-Body Database, orbit solution 60,
+        epoch JD 2461200.5 (equinox J2000). Look it up yourself:
+        <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL SBDB</a>
+        ·
+        <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
+      </div>
+      <div class="grid">
+        <label><b>a</b> semi-major axis, AU <span class="tag">JPL</span>
+          <input id="el-a" class="confirmed" type="number" step="any" value="2.348928725809226" readonly tabindex="-1"></label>
+        <label><b>e</b> eccentricity <span class="tag">JPL</span>
+          <input id="el-e" class="confirmed" type="number" step="any" value="0.2365493866662888" readonly tabindex="-1"></label>
+        <label><b>i</b> inclination, ° <span class="tag">JPL</span>
+          <input id="el-i" class="confirmed" type="number" step="any" value="2.576837989836605" readonly tabindex="-1"></label>
+        <label><b>Ω</b> asc. node, ° <span class="tag">JPL</span>
+          <input id="el-om" class="confirmed" type="number" step="any" value="37.19373899418512" readonly tabindex="-1"></label>
+        <label><b>ω</b> arg. perihelion, ° <span class="tag">JPL</span>
+          <input id="el-w" class="confirmed" type="number" step="any" value="275.3609425297252" readonly tabindex="-1"></label>
+        <label><b>M₀</b> mean anomaly @ epoch, ° <span class="tag">JPL</span>
+          <input id="el-m" class="confirmed" type="number" step="any" value="75.34840192021278" readonly tabindex="-1"></label>
+      </div>
+    </div>
+  </details>
+
+  <div id="foot">
+    Contract
+    <span class="ca">0x5759A852243A56A48853Af1d28fd4e0f33747C9B</span>.
+    Look up 18932 Robinhood at the
+    <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL Small-Body Database</a>
+    or the
+    <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
+    Two-body Keplerian propagation. Planets use J2000 mean elements; Ceres and Pluto use JPL SBDB.
+    Starman is Tesla Roadster (Horizons s11). Positions are illustrative, not
+    ephemeris-grade. Green means the rock is closing on Earth. Not financial advice,
+    not planetary-defense advice.
   </div>
 
 </div>
@@ -312,6 +369,7 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
 /* ================= math ================= */
 const DEG = Math.PI/180;
 const AU_KM = 149597870.7;
+const LD_KM = 384400;
 const J2000 = 2451545.0;
 
 function kepler(M, e){
@@ -571,6 +629,28 @@ function updateStaticStats(){
 const map = document.getElementById('orbitmap');
 const mctx = map.getContext('2d');
 let stars = [];
+const imgRobin = new Image();
+imgRobin.src = 'assets/marker-robinhood.png';
+const imgStarman = new Image();
+imgStarman.src = 'assets/marker-starman.png';
+function drawPfp(img, x, y, size, ring){
+  if(img.complete && img.naturalWidth){
+    mctx.save();
+    mctx.beginPath();
+    mctx.arc(x, y, size/2, 0, 7);
+    mctx.closePath();
+    mctx.clip();
+    mctx.drawImage(img, x-size/2, y-size/2, size, size);
+    mctx.restore();
+    mctx.strokeStyle = ring;
+    mctx.lineWidth = 2;
+    mctx.beginPath();
+    mctx.arc(x, y, size/2 + 1, 0, 7);
+    mctx.stroke();
+    return true;
+  }
+  return false;
+}
 
 function resize(){
   const w = map.clientWidth, h = map.clientHeight;
@@ -657,15 +737,13 @@ function drawMap(){
     mctx.setLineDash([]);
     const rpos = position(ROADSTER, simJD);
     const [rx,ry] = toPx(rpos.x,rpos.y);
-    const rg = mctx.createRadialGradient(rx,ry,0,rx,ry,10);
-    rg.addColorStop(0,'rgba(232,33,39,0.85)'); rg.addColorStop(1,'rgba(232,33,39,0)');
-    mctx.fillStyle = rg;
-    mctx.beginPath(); mctx.arc(rx,ry,10,0,7); mctx.fill();
-    mctx.fillStyle = ROADSTER.col;
-    mctx.beginPath(); mctx.arc(rx,ry,ROADSTER.rad,0,7); mctx.fill();
+    if(!drawPfp(imgStarman, rx, ry, 26, 'rgba(232,33,39,0.95)')){
+      mctx.fillStyle = ROADSTER.col;
+      mctx.beginPath(); mctx.arc(rx,ry,ROADSTER.rad,0,7); mctx.fill();
+    }
     mctx.fillStyle = '#f5a3a0';
     mctx.font = '11px '+getComputedStyle(document.body).fontFamily;
-    mctx.fillText('Starman', rx+8, ry-8);
+    mctx.fillText('Starman', rx+14, ry-10);
   }
 
   // asteroid orbit — the green line
@@ -704,16 +782,18 @@ function drawMap(){
   }
   mctx.globalAlpha = 1;
 
-  // asteroid marker w/ glow
-  const ag = mctx.createRadialGradient(ax,ay,0,ax,ay,14);
-  ag.addColorStop(0,'rgba(0,200,5,0.9)'); ag.addColorStop(1,'rgba(0,200,5,0)');
-  mctx.fillStyle = ag;
-  mctx.beginPath(); mctx.arc(ax,ay,14,0,7); mctx.fill();
-  mctx.fillStyle = '#aef7b0';
-  mctx.beginPath(); mctx.arc(ax,ay,3.5,0,7); mctx.fill();
+  // asteroid marker — hat badge
+  if(!drawPfp(imgRobin, ax, ay, 34, 'rgba(0,200,5,0.95)')){
+    const ag = mctx.createRadialGradient(ax,ay,0,ax,ay,14);
+    ag.addColorStop(0,'rgba(0,200,5,0.9)'); ag.addColorStop(1,'rgba(0,200,5,0)');
+    mctx.fillStyle = ag;
+    mctx.beginPath(); mctx.arc(ax,ay,14,0,7); mctx.fill();
+    mctx.fillStyle = '#aef7b0';
+    mctx.beginPath(); mctx.arc(ax,ay,3.5,0,7); mctx.fill();
+  }
   mctx.fillStyle = '#00c805';
   mctx.font = '700 12px '+getComputedStyle(document.body).fontFamily;
-  mctx.fillText('RH-18932', ax+10, ay+4);
+  mctx.fillText('RH-18932', ax+16, ay+4);
 }
 
 /* pan / zoom */
@@ -793,8 +873,10 @@ function updateReadouts(){
   const rateKmDay = (d1-d)*AU_KM;
   const closing = rateKmDay < 0;
 
+  const km = d*AU_KM;
+  document.getElementById('bigkm').innerHTML = Math.round(km).toLocaleString('en-US')+'<small>km</small>';
+  document.getElementById('lunarline').textContent = (km/LD_KM).toFixed(1)+' lunar distances';
   document.getElementById('bigdist').innerHTML = d.toFixed(4)+' <span>AU</span>';
-  document.getElementById('kmline').textContent = Math.round(d*AU_KM).toLocaleString('en-US')+' km from Earth';
 
   const delta = document.getElementById('delta');
   delta.className = closing?'closing':'receding';
