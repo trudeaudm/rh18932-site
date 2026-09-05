@@ -93,6 +93,25 @@ body{
 #pair h2{font-size:19px;font-weight:700;margin-top:10px}
 #pair .fullname{font-size:12px;color:var(--mut);margin-top:2px}
 
+#contract{
+  padding:10px 20px 14px;border-bottom:1px solid var(--line);
+}
+#contract .k{font-size:11px;color:var(--mut)}
+#contract .row{display:flex;align-items:center;gap:8px;margin-top:4px}
+#contract .v{
+  flex:1;min-width:0;
+  font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;
+  word-break:break-all;line-height:1.35;
+}
+#contract button{
+  flex-shrink:0;
+  background:var(--panel2);border:1px solid var(--line);color:var(--green);
+  font-family:var(--font);font-size:11px;font-weight:700;
+  padding:6px 10px;border-radius:6px;cursor:pointer;
+}
+#contract button:hover{border-color:var(--green-dim)}
+#contract button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+
 #quote{padding:8px 20px 16px;border-bottom:1px solid var(--line)}
 #bigdist{font-size:42px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.05}
 #bigdist span{font-size:18px;color:var(--mut);font-weight:500}
@@ -152,13 +171,18 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
   color:var(--ink);font-family:var(--font);font-size:13px;font-variant-numeric:tabular-nums;
   padding:7px 9px;
 }
-#elements input:focus{outline:none;border-color:var(--green)}
+#elements input:focus{outline:none;border-color:var(--green-dim)}
 #elements input.confirmed{border-color:var(--green-dim)}
+#elements input[readonly]{cursor:default;pointer-events:none}
+#elements input::-webkit-inner-spin-button,
+#elements input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#elements input[type=number]{-moz-appearance:textfield}
 #elements .tag{font-size:10px;color:var(--green)}
 #elements .tag.ph{color:var(--orange)}
 
 #foot{padding:14px 20px;font-size:11px;color:var(--mut);line-height:1.6;margin-top:auto}
 #foot a{color:var(--green);text-decoration:none;border-bottom:1px solid var(--green-dim)}
+#foot .ca{color:var(--ink);font-variant-numeric:tabular-nums;word-break:break-all}
 
 @media (max-width:860px){
   body{overflow:auto}
@@ -198,7 +222,15 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
       <div>
         <span class="chip">$RH-18932</span>
         <h2>RH-18932 / EARTH</h2>
-        <div class="fullname">18932 Robinhood (2000 QH35) · main-belt asteroid · proximity pair</div>
+        <div class="fullname">18932 Robinhood (2000 QH35) · 3.75 km · main-belt asteroid · proximity pair</div>
+      </div>
+    </div>
+
+    <div id="contract">
+      <div class="k">Contract</div>
+      <div class="row">
+        <div class="v" id="ca">0x5759A852243A56A48853Af1d28fd4e0f33747C9B</div>
+        <button type="button" id="copyca">Copy</button>
       </div>
     </div>
 
@@ -229,6 +261,8 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
       <div><div class="k">Heliocentric dist.</div><div class="v" id="s-helio">—</div></div>
       <div><div class="k">Orbital speed</div><div class="v" id="s-vel">—</div></div>
       <div><div class="k">Eccentricity</div><div class="v" id="s-ecc">—</div></div>
+      <div><div class="k">Diameter</div><div class="v">3.75 km</div></div>
+      <div><div class="k">Abs. magnitude H</div><div class="v">14.88</div></div>
     </div>
 
     <details id="elements">
@@ -240,26 +274,27 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
           <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL SBDB</a>
           ·
           <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
-          Edit any value and everything recalculates live.
         </div>
         <div class="grid">
           <label><b>a</b> semi-major axis, AU <span class="tag">JPL</span>
-            <input id="el-a" class="confirmed" type="number" step="0.0001" value="2.35"></label>
+            <input id="el-a" class="confirmed" type="number" step="any" value="2.348928725809226" readonly tabindex="-1"></label>
           <label><b>e</b> eccentricity <span class="tag">JPL</span>
-            <input id="el-e" class="confirmed" type="number" step="0.000001" value="0.237"></label>
+            <input id="el-e" class="confirmed" type="number" step="any" value="0.2365493866662888" readonly tabindex="-1"></label>
           <label><b>i</b> inclination, ° <span class="tag">JPL</span>
-            <input id="el-i" class="confirmed" type="number" step="0.001" value="2.58"></label>
+            <input id="el-i" class="confirmed" type="number" step="any" value="2.576837989836605" readonly tabindex="-1"></label>
           <label><b>Ω</b> asc. node, ° <span class="tag">JPL</span>
-            <input id="el-om" class="confirmed" type="number" step="0.001" value="37.2"></label>
+            <input id="el-om" class="confirmed" type="number" step="any" value="37.19373899418512" readonly tabindex="-1"></label>
           <label><b>ω</b> arg. perihelion, ° <span class="tag">JPL</span>
-            <input id="el-w" class="confirmed" type="number" step="0.001" value="275.0"></label>
+            <input id="el-w" class="confirmed" type="number" step="any" value="275.3609425297252" readonly tabindex="-1"></label>
           <label><b>M₀</b> mean anomaly @ epoch, ° <span class="tag">JPL</span>
-            <input id="el-m" class="confirmed" type="number" step="0.001" value="75.3"></label>
+            <input id="el-m" class="confirmed" type="number" step="any" value="75.34840192021278" readonly tabindex="-1"></label>
         </div>
       </div>
     </details>
 
     <div id="foot">
+      Contract
+      <span class="ca">0x5759A852243A56A48853Af1d28fd4e0f33747C9B</span>.
       Look up 18932 Robinhood at the
       <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL Small-Body Database</a>
       or the
@@ -335,10 +370,9 @@ const EARTH = PLANETS[2];
 
 let astEpoch = 2461200.5; // JPL SBDB orbit solution 60 epoch (2026-Jun-09); fetch may bump this
 let ast = null;
-let elementsTouched = false;
 function readElements(){
-  const a  = parseFloat(document.getElementById('el-a').value)  || 2.35;
-  const e  = Math.min(0.95, Math.max(0, parseFloat(document.getElementById('el-e').value) || 0.237));
+  const a  = parseFloat(document.getElementById('el-a').value)  || 2.348928725809226;
+  const e  = Math.min(0.95, Math.max(0, parseFloat(document.getElementById('el-e').value) || 0.2365493866662888));
   const i  = parseFloat(document.getElementById('el-i').value)  || 0;
   const om = parseFloat(document.getElementById('el-om').value) || 0;
   const w  = parseFloat(document.getElementById('el-w').value)  || 0;
@@ -368,7 +402,6 @@ function setElementsNote(html){
 }
 
 function applyJplElements(data){
-  if(elementsTouched) return;
   const orbit = data && data.orbit;
   const els = orbit && orbit.elements;
   if(!els || !els.length) throw new Error('missing orbit.elements');
@@ -382,7 +415,6 @@ function applyJplElements(data){
   const orbitId = orbit.orbit_id;
   if(![a,e,i,om,w,ma,epoch].every(v => Number.isFinite(v)) || orbitId==null)
     throw new Error('incomplete elements');
-  if(elementsTouched) return;
   document.getElementById('el-a').value  = a;
   document.getElementById('el-e').value  = e;
   document.getElementById('el-i').value  = i;
@@ -395,16 +427,13 @@ function applyJplElements(data){
   for(const t of tags) t.textContent = 'JPL live';
   setElementsNote(
     'Live orbital elements from the JPL Small-Body Database, orbit solution '+orbitId+
-    ', epoch JD '+epoch+' (equinox J2000). Look it up yourself: '+EL_SOURCE+
-    '. Edit any value and everything recalculates live.'
+    ', epoch JD '+epoch+' (equinox J2000). Look it up yourself: '+EL_SOURCE+'.'
   );
 }
 
 function useCachedElementsNote(){
   setElementsNote(
-    'Cached elements are in use (JPL SBDB fetch failed). '+
-    'Orbit solution 60, epoch JD 2461200.5 (equinox J2000). Look it up yourself: '+EL_SOURCE+
-    '. Edit any value and everything recalculates live.'
+    'Baked-in JPL SBDB orbit solution 60 (epoch JD 2461200.5). Live fetch failed; these are still the current published elements. Look it up yourself: '+EL_SOURCE+'.'
   );
 }
 
@@ -753,11 +782,21 @@ document.getElementById('slower').addEventListener('click',()=>{ scrubEl.value=M
 document.getElementById('faster').addEventListener('click',()=>{ scrubEl.value=Math.min(100,+scrubEl.value+8); scrubEl.dispatchEvent(new Event('input')); });
 scrubEl.value = 47; speed = speedFromScrub(47); updateSpeedLabel();
 
-for(const id of ['el-a','el-e','el-i','el-om','el-w','el-m']){
-  const inp = document.getElementById(id);
-  inp.addEventListener('input', function(){ elementsTouched = true; });
-  inp.addEventListener('change', readElements);
-}
+const CA = '0x5759A852243A56A48853Af1d28fd4e0f33747C9B';
+const copyca = document.getElementById('copyca');
+copyca.addEventListener('click', function(){
+  const done = function(){
+    copyca.textContent = 'Copied';
+    setTimeout(function(){ copyca.textContent = 'Copy'; }, 1400);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(CA).then(done).catch(function(){
+      window.getSelection().selectAllChildren(document.getElementById('ca'));
+    });
+  } else {
+    window.getSelection().selectAllChildren(document.getElementById('ca'));
+  }
+});
 
 /* ================= boot ================= */
 readElements();
