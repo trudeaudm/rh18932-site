@@ -305,7 +305,7 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
           <button id="todaybtn">Today</button>
           <div class="rate">
             <button id="slower" aria-label="Slower">−</button>
-            <input type="range" id="scrub" min="0" max="100" value="8" aria-label="Simulation speed">
+            <input type="range" id="scrub" min="0" max="100" value="35" aria-label="Simulation speed">
             <button id="faster" aria-label="Faster">+</button>
             <div id="speedlabel">1 d/s</div>
           </div>
@@ -1191,15 +1191,22 @@ document.getElementById('todaybtn').addEventListener('click',()=>{
   rebuildChart(true);
 });
 const scrubEl = document.getElementById('scrub');
-function speedFromScrub(v){ // 0..100 → 0.5 .. 3000 d/s, log
-  return 0.5*Math.pow(6000, v/100);
+const SPEED_MIN = 1/24;      // 1 hour per second
+const SPEED_MAX = 365.25;    // 1 year per second
+function speedFromScrub(v){
+  return SPEED_MIN * Math.pow(SPEED_MAX / SPEED_MIN, v/100);
 }
 function scrubFromSpeed(spd){
-  return 100 * Math.log(spd / 0.5) / Math.log(6000);
+  return 100 * Math.log(spd / SPEED_MIN) / Math.log(SPEED_MAX / SPEED_MIN);
+}
+function fmtSpeed(n, unit){
+  return (Math.abs(n - Math.round(n)) < 0.05 ? String(Math.round(n)) : n.toFixed(1)) + ' ' + unit;
 }
 function updateSpeedLabel(){
   const l = document.getElementById('speedlabel');
-  l.textContent = speed >= 365 ? (speed/365.25).toFixed(1)+' yr/s' : Math.round(speed)+' d/s';
+  if(speed >= SPEED_MAX * 0.98) l.textContent = '1 yr/s';
+  else if(speed >= 1) l.textContent = fmtSpeed(speed, 'd/s');
+  else l.textContent = fmtSpeed(speed * 24, 'h/s');
 }
 scrubEl.addEventListener('input',()=>{ speed = speedFromScrub(+scrubEl.value); updateSpeedLabel(); });
 document.getElementById('slower').addEventListener('click',()=>{ scrubEl.value=Math.max(0,+scrubEl.value-8); scrubEl.dispatchEvent(new Event('input')); });
