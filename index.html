@@ -203,7 +203,7 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
     <canvas id="orbitmap"></canvas>
     <div id="maphead">
       <h1>ROBINHOOD CHAIN · DEEP SPACE DESK</h1>
-      <div class="sub">heliocentric view · ecliptic plane · drag to pan · scroll to zoom</div>
+      <div class="sub">heliocentric view · ecliptic plane · red = Starman · scroll out for ice giants and Pluto · drag to pan</div>
     </div>
     <div id="simdate"><small>SIMULATION DATE</small><span id="datestr">—</span></div>
     <div id="timebar">
@@ -299,8 +299,9 @@ details#elements summary:focus-visible{outline:2px solid var(--green);outline-of
       <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=20018932" target="_blank" rel="noopener">JPL Small-Body Database</a>
       or the
       <a href="https://www.minorplanetcenter.net/db_search/show_object?object_id=18932" target="_blank" rel="noopener">Minor Planet Center</a>.
-      Two-body Keplerian propagation. Inner planets use J2000 mean elements; positions are
-      illustrative, not ephemeris-grade. Green means the rock is closing on Earth. Not financial advice,
+      Two-body Keplerian propagation. Planets use J2000 mean elements; Ceres and Pluto use JPL SBDB.
+      The red orbit is Tesla Roadster / Starman (Horizons s11). Positions are illustrative, not
+      ephemeris-grade. Green means the rock is closing on Earth. Not financial advice,
       not planetary-defense advice.
     </div>
   </div>
@@ -361,12 +362,40 @@ function fmtDate(jd){
 /* ================= bodies ================= */
 /* J2000 mean elements, epoch JD 2451545.0 */
 const PLANETS = [
- {name:'Mercury', a:0.38710, e:0.20563, i:7.005,  om:48.331,  w:29.124,  M0:174.796, period:87.969,  epoch:J2000, col:'#5a6b5a', rad:2.5},
- {name:'Venus',   a:0.72333, e:0.00677, i:3.395,  om:76.680,  w:54.884,  M0:50.416,  period:224.701, epoch:J2000, col:'#8fa38f', rad:3.5},
- {name:'Earth',   a:1.00000, e:0.01671, i:0.0,    om:0.0,     w:102.947, M0:357.517, period:365.256, epoch:J2000, col:'#4aa3ff', rad:4},
- {name:'Mars',    a:1.52368, e:0.09340, i:1.850,  om:49.558,  w:286.502, M0:19.373,  period:686.980, epoch:J2000, col:'#c96a4a', rad:3},
+ {name:'Mercury', a:0.38710, e:0.20563, i:7.005,  om:48.331,  w:29.124,  M0:174.796, period:87.969,   epoch:J2000, col:'#5a6b5a', rad:2.5},
+ {name:'Venus',   a:0.72333, e:0.00677, i:3.395,  om:76.680,  w:54.884,  M0:50.416,  period:224.701,  epoch:J2000, col:'#8fa38f', rad:3.5},
+ {name:'Earth',   a:1.00000, e:0.01671, i:0.0,    om:0.0,     w:102.947, M0:357.517, period:365.256,  epoch:J2000, col:'#4aa3ff', rad:4},
+ {name:'Mars',    a:1.52368, e:0.09340, i:1.850,  om:49.558,  w:286.502, M0:19.373,  period:686.980,  epoch:J2000, col:'#c96a4a', rad:3},
+ {name:'Jupiter', a:5.20289, e:0.04839, i:1.304,  om:100.474, w:274.255, M0:19.668,  period:4332.59,  epoch:J2000, col:'#d4b483', rad:6},
+ {name:'Saturn',  a:9.53668, e:0.05386, i:2.486,  om:113.662, w:338.936, M0:317.355, period:10759.22, epoch:J2000, col:'#e6d39a', rad:5.5},
+ {name:'Uranus',  a:19.1892, e:0.04726, i:0.773,  om:74.017,  w:96.937,  M0:142.284, period:30688.5,  epoch:J2000, col:'#7ec8c8', rad:4.5},
+ {name:'Neptune', a:30.0695, e:0.00868, i:1.770,  om:131.784, w:273.181, M0:259.384, period:60182,    epoch:J2000, col:'#4169e1', rad:4.5},
 ];
 const EARTH = PLANETS[2];
+const SATURN = PLANETS[5];
+/* Ceres + Pluto — JPL SBDB (Ceres soln 48 epoch 2461200.5; Pluto epoch 2457588.5) */
+const MINORS = [
+ {name:'Ceres', a:2.765552595034094, e:0.07969229514816586, i:10.58802780183462,
+  om:80.24862682043221, w:73.29421453021587, M0:274.4193463761342,
+  period:1679.853119758983, epoch:2461200.5, col:'#c4b49a', rad:3.2},
+ {name:'Pluto', a:39.58862938517124, e:0.2518378778576892, i:17.14771140999114,
+  om:110.2923840543057, w:113.7090015158565, M0:38.68366347318184,
+  period:90981.71647718345, epoch:2457588.5, col:'#d8c4b0', rad:3.2},
+];
+/* Tesla Roadster / Starman — JPL Horizons s11, heliocentric ecliptic J2000, epoch 2018-Feb-15 */
+const ROADSTER = {
+  name:'Starman',
+  a:1.329906843562659,
+  e:0.2585498518579811,
+  i:1.088462199267203,
+  om:317.3549172886180,
+  w:177.3203193988166,
+  M0:6.991668277951323,
+  period:560.1834296617491,
+  epoch:2458164.5,
+  col:'#e82127',
+  rad:3
+};
 
 let astEpoch = 2461200.5; // JPL SBDB orbit solution 60 epoch (2026-Jun-09); fetch may bump this
 let ast = null;
@@ -480,6 +509,8 @@ function sampleOrbit(el, N=240){
 function rebuildStatics(){
   orbitPaths = {};
   for(const p of PLANETS) orbitPaths[p.name] = sampleOrbit(p);
+  for(const p of MINORS) orbitPaths[p.name] = sampleOrbit(p, 280);
+  orbitPaths[ROADSTER.name] = sampleOrbit(ROADSTER, 280);
   orbitPaths[ast.name] = sampleOrbit(ast, 360);
   trail = [];
   rebuildChart(true);
@@ -546,7 +577,9 @@ function resize(){
   const dpr = window.devicePixelRatio || 1;
   map.width = w*dpr; map.height = h*dpr;
   mctx.setTransform(dpr,0,0,dpr,0,0);
-  const maxR = Math.max(ast ? ast.a*(1+ast.e) : 3.4, 1.6) * 1.15;
+  const beltR = ast ? ast.a*(1+ast.e) : 3.4;
+  const satR  = SATURN.a*(1+SATURN.e);
+  const maxR = Math.max(beltR, satR, 1.6) * 1.12;
   scale = Math.min(w,h) / (2*maxR);
   // starfield, seeded
   stars = [];
@@ -581,9 +614,12 @@ function drawMap(){
   mctx.fillStyle = g;
   mctx.beginPath(); mctx.arc(sx,sy,26,0,7); mctx.fill();
 
-  // planet orbits + bodies
-  for(const p of PLANETS){
-    mctx.strokeStyle = 'rgba(120,140,120,0.28)';
+  // planet + dwarf orbits and markers
+  const named = PLANETS.concat(MINORS);
+  for(const p of named){
+    if(!orbitPaths[p.name]) continue;
+    mctx.strokeStyle = p.name==='Ceres' || p.name==='Pluto'
+      ? 'rgba(180,160,130,0.35)' : 'rgba(120,140,120,0.28)';
     mctx.lineWidth = 1;
     mctx.beginPath();
     orbitPaths[p.name].forEach(([x,y],k)=>{
@@ -599,9 +635,37 @@ function drawMap(){
       mctx.strokeStyle='rgba(74,163,255,0.5)';
       mctx.beginPath(); mctx.arc(px,py,p.rad+4,0,7); mctx.stroke();
     }
-    mctx.fillStyle = 'rgba(150,170,150,0.75)';
+    const showLabel = p.name==='Earth' || p.name==='Ceres' || p.name==='Pluto' || (scale*zoom*p.a > 36);
+    if(showLabel){
+      mctx.fillStyle = 'rgba(150,170,150,0.75)';
+      mctx.font = '11px '+getComputedStyle(document.body).fontFamily;
+      mctx.fillText(p.name, px+8, py-8);
+    }
+  }
+
+  // Tesla Roadster / Starman
+  if(orbitPaths[ROADSTER.name]){
+    mctx.strokeStyle = 'rgba(232,33,39,0.5)';
+    mctx.lineWidth = 1.2;
+    mctx.setLineDash([3,5]);
+    mctx.beginPath();
+    orbitPaths[ROADSTER.name].forEach(([x,y],k)=>{
+      const [px,py]=toPx(x,y);
+      k?mctx.lineTo(px,py):mctx.moveTo(px,py);
+    });
+    mctx.stroke();
+    mctx.setLineDash([]);
+    const rpos = position(ROADSTER, simJD);
+    const [rx,ry] = toPx(rpos.x,rpos.y);
+    const rg = mctx.createRadialGradient(rx,ry,0,rx,ry,10);
+    rg.addColorStop(0,'rgba(232,33,39,0.85)'); rg.addColorStop(1,'rgba(232,33,39,0)');
+    mctx.fillStyle = rg;
+    mctx.beginPath(); mctx.arc(rx,ry,10,0,7); mctx.fill();
+    mctx.fillStyle = ROADSTER.col;
+    mctx.beginPath(); mctx.arc(rx,ry,ROADSTER.rad,0,7); mctx.fill();
+    mctx.fillStyle = '#f5a3a0';
     mctx.font = '11px '+getComputedStyle(document.body).fontFamily;
-    mctx.fillText(p.name, px+8, py-8);
+    mctx.fillText('Starman', rx+8, ry-8);
   }
 
   // asteroid orbit — the green line
@@ -664,7 +728,7 @@ map.addEventListener('pointerup',()=>dragging=false);
 map.addEventListener('wheel',e=>{
   e.preventDefault();
   zoom *= e.deltaY<0 ? 1.1 : 0.9;
-  zoom = Math.min(12, Math.max(0.35, zoom));
+  zoom = Math.min(16, Math.max(0.08, zoom));
 },{passive:false});
 
 /* ================= chart ================= */
